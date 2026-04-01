@@ -33,11 +33,9 @@ Calculations are based on the following roll distributions.
 ## ⚠️ Known Behaviors
 
 - **Speed Weighting:** Speed is currently weighted lower in the final score. Because it only rolls between $1$ and $2$ (with $2$ being significantly rarer), gear containing Speed may result in a lower total score compared to other stats.
-- **Ongoing Development:** Styling and advanced design elements have not yet been applied.
+- **Ongoing Development:** Advanced design elements have not yet been applied.
 
 ---
 
 ## 🛠 Future Roadmap
-
-- [ ] Implement CSS/UI design overhaul.
 - [ ] Add support for flat stat calculations.
