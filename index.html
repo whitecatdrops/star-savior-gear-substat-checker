@@ -4,68 +4,203 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>[Star Savior] Gear Substats Checker</title>
+    <style>
+      :root {
+        --bg-color: #1a1c1e;
+        --surface: #202429;
+        --primary: #d1e4ff;
+        --on-primary: #003258;
+        --secondary-container: #3e4759;
+        --on-secondary-container: #d7e3f7;
+        --outline: #8e9199;
+        --text-main: #e2e2e6;
+        --text-label: #bec7cf;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: "Roboto", sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        margin: 0;
+      }
+
+      .card {
+        background-color: var(--surface);
+        padding: 24px;
+        border-radius: 28px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      h2 {
+        margin-top: 0;
+        font-weight: 400;
+        color: var(--primary);
+        text-align: center;
+      }
+
+      .input-group {
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      label {
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        margin-left: 4px;
+        color: var(--text-label);
+        font-weight: 500;
+      }
+
+      input {
+        background: transparent;
+        border: 1px solid var(--outline);
+        border-radius: 4px;
+        padding: 12px;
+        color: white;
+        font-size: 1rem;
+        transition: border 0.2s ease;
+      }
+
+      input:focus {
+        outline: none;
+        border: 2px solid var(--primary);
+        padding: 11px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      button {
+        flex: 1;
+        padding: 12px;
+        border-radius: 100px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          transform 0.1s,
+          opacity 0.2s;
+      }
+
+      button:active {
+        transform: scale(0.97);
+      }
+
+      button[onclick="calculateScore()"] {
+        background-color: var(--primary);
+        color: var(--on-primary);
+      }
+
+      button[onclick="resetForm()"] {
+        background-color: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      .result-section {
+        margin-top: 24px;
+        padding: 16px;
+        border-top: 1px solid var(--secondary-container);
+        text-align: center;
+      }
+
+      #display {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: var(--primary);
+        margin-top: 8px;
+      }
+
+      .max-hint {
+        font-size: 0.8rem;
+        opacity: 0.7;
+      }
+
+      button[onclick="calculateScore()"]:hover {
+        background-color: #bcd9ff;
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.4),
+          0 4px 8px rgba(0, 0, 0, 0.2);
+        filter: brightness(1.1);
+      }
+
+      button[onclick="resetForm()"]:hover {
+        background-color: #4a5468;
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.4),
+          0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      button:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+    </style>
   </head>
   <body>
-    <h2>Gear Substats Checker</h2>
+    <div class="card">
+      <h2>Gear Substats Checker</h2>
 
-    <form id="gearForm">
-      <div>
-        <label>Attack (%): </label>
-        <input type="number" id="attack" step="any" />
+      <form id="gearForm">
+        <div class="input-group">
+          <label>Attack</label>
+          <input type="number" id="attack" step="any" placeholder="0" />
+        </div>
+
+        <div class="input-group">
+          <label>Defense</label>
+          <input type="number" id="defense" step="any" placeholder="0" />
+        </div>
+
+        <div class="input-group">
+          <label>HP</label>
+          <input type="number" id="hp" step="any" placeholder="0" />
+        </div>
+
+        <div class="input-group">
+          <label>Speed</label>
+          <input type="number" id="speed" step="any" placeholder="0" />
+        </div>
+
+        <div class="input-group">
+          <label>Crit Rate</label>
+          <input type="number" id="critRate" step="any" placeholder="0" />
+        </div>
+
+        <div class="input-group">
+          <label>Crit Damage</label>
+          <input type="number" id="critDamage" step="any" placeholder="0" />
+        </div>
+
+        <div class="input-group">
+          <label>Effect Hit</label>
+          <input type="number" id="effectHit" step="any" placeholder="0" />
+        </div>
+
+        <div class="input-group">
+          <label>Effect Resist</label>
+          <input type="number" id="effectResist" step="any" placeholder="0" />
+        </div>
+
+        <div class="actions">
+          <button type="button" onclick="calculateScore()">Submit</button>
+          <button type="button" onclick="resetForm()">Reset</button>
+        </div>
+      </form>
+
+      <div class="result-section">
+        <div class="max-hint">Max Possible: 90 (100%)</div>
+        <div id="display">Gear Score: 0 (0%)</div>
       </div>
-      <br />
-
-      <div>
-        <label>Defense (%): </label>
-        <input type="number" id="defense" step="any" />
-      </div>
-      <br />
-
-      <div>
-        <label>HP (%): </label>
-        <input type="number" id="hp" step="any" />
-      </div>
-      <br />
-
-      <div>
-        <label>Speed (%): </label>
-        <input type="number" id="speed" step="any" />
-      </div>
-      <br />
-
-      <div>
-        <label>Crit Rate (%): </label>
-        <input type="number" id="critRate" step="any" />
-      </div>
-      <br />
-
-      <div>
-        <label>Crit Damage (%): </label>
-        <input type="number" id="critDamage" step="any" />
-      </div>
-      <br />
-
-      <div>
-        <label>Effect Hit: </label>
-        <input type="number" id="effectHit" step="any" />
-      </div>
-      <br />
-
-      <div>
-        <label>Effect Resist (%): </label>
-        <input type="number" id="effectResist" step="any" />
-      </div>
-      <br />
-
-      <button type="button" onclick="calculateScore()">Submit</button>
-      <button type="button" onclick="resetForm()">Reset</button>
-    </form>
-
-    <hr />
-
-    <h3>Result:</h3>
-    <p>Max: 90 (100%)</p>
-    <div id="display">Gear Score: 0 (0%)</div>
+    </div>
 
     <script>
       function calculateScore() {
