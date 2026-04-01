@@ -40,5 +40,4 @@ Calculations are based on the following roll distributions.
 ## 🛠 Future Roadmap
 
 - [ ] Implement CSS/UI design overhaul.
-- [ ] Expand sample size for more accurate roll probability.
 - [ ] Add support for flat stat calculations.
