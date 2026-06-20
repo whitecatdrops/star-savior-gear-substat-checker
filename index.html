@@ -238,42 +238,50 @@
 
     <script>
       function calculateScore() {
-        const val = (id) => parseFloat(document.getElementById(id).value) || 0;
-        const atk = val("attack");
-        const def = val("defense");
-        const hp = val("hp");
-        const flatAtk = val("flat-attack");
-        const flatDef = val("flat-defense");
-        const flatHp = val("flat-hp");
-        const spd = val("speed");
-        const cr = val("critRate");
-        const cd = val("critDamage");
-        const eh = val("effectHit");
-        const er = val("effectResist");
+  const val = (id) => parseFloat(document.getElementById(id).value) || 0;
+  
+  const atk = val("attack");
+  const def = val("defense");
+  const hp = val("hp");
+  const flatAtk = val("flat-attack");
+  const flatDef = val("flat-defense");
+  const flatHp = val("flat-hp");
+  const spd = val("speed");
+  const cr = val("critRate");
+  const cd = val("critDamage");
+  const eh = val("effectHit");
+  const er = val("effectResist");
 
-        const gearScore = (
-    (spd - 1) +                         // Max 2, Min 1
-    (flatAtk - 20) / 25 +                   // Max 45, Min 20
-    (flatDef - 12) / 15 +                   // Max 27, Min 12
-    (flatHp - 120) / 150 +                  // Max 270, Min 120
-    (atk - 0.6) / 1.0 +                     // Max 1.6, Min 0.6
-    (def - 0.6) / 1.0 +                     // Max 1.6, Min 0.6
-    (hp - 0.6) / 1.0 +                      // Max 1.6, Min 0.6
-    (cr - 1.0) / 1.0 +                      // Max 2.0, Min 1.0
-    (cd - 1.5) / 1.5 +                      // Max 3.0, Min 1.5
-    (eh - 1.0) / 2.0 +                      // Max 3.0, Min 1.0
-    (er - 1.0) / 2.0                        // Max 3.0, Min 1.0
-) * 10;
+  // Sum up the scores conditionally
+  let gearScore = 0;
 
-        const percentage = (gearScore / 90) * 100;
+  if (spd > 0)       gearScore += (spd - 1);
+  if (flatAtk > 0)   gearScore += (flatAtk - 20) / 25;
+  if (flatDef > 0)   gearScore += (flatDef - 12) / 15;
+  if (flatHp > 0)    gearScore += (flatHp - 120) / 150;
+  if (atk > 0)       gearScore += (atk - 0.6) / 1.0;
+  if (def > 0)       gearScore += (def - 0.6) / 1.0;
+  if (hp > 0)        gearScore += (hp - 0.6) / 1.0;
+  if (cr > 0)        gearScore += (cr - 1.0) / 1.0;
+  if (cd > 0)        gearScore += (cd - 1.5) / 1.5;
+  if (eh > 0)        gearScore += (eh - 1.0) / 2.0;
+  if (er > 0)        gearScore += (er - 1.0) / 2.0;
 
-        document.getElementById("display").innerText =
-          "Gear Score: " +
-          gearScore.toFixed(2) +
-          " (" +
-          percentage.toFixed(2) +
-          "%)";
-      }
+  // Multiply total by 10 at the end
+  gearScore *= 10;
+
+  // Prevent any weird edge cases from dipping below 0
+  if (gearScore < 0) gearScore = 0;
+
+  const percentage = (gearScore / 90) * 100;
+
+  document.getElementById("display").innerText =
+    "Gear Score: " +
+    gearScore.toFixed(2) +
+    " (" +
+    percentage.toFixed(2) +
+    "%)";
+}
 
       function resetForm() {
         document.getElementById("gearForm").reset();
