@@ -8,6 +8,7 @@
       :root {
         --bg-color: #1a1c1e;
         --surface: #202429;
+        --surface-variant: #2a2f35;
         --primary: #d1e4ff;
         --on-primary: #003258;
         --secondary-container: #3e4759;
@@ -15,6 +16,8 @@
         --outline: #8e9199;
         --text-main: #e2e2e6;
         --text-label: #bec7cf;
+        --tier-good: #8cd6ff;
+        --tier-god: #ffd700;
       }
 
       body {
@@ -105,12 +108,12 @@
         transform: scale(0.97);
       }
 
-      button[onclick="calculateScore()"] {
+      button[type="submit"] {
         background-color: var(--primary);
         color: var(--on-primary);
       }
 
-      button[onclick="resetForm()"] {
+      button[type="reset"] {
         background-color: var(--secondary-container);
         color: var(--on-secondary-container);
       }
@@ -135,8 +138,44 @@
         opacity: 0.7;
       }
 
+      /* Extra Notes Styling */
+      .notes-container {
+        grid-column: 1 / -1;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px dashed var(--secondary-container);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+        text-align: left;
+      }
+
+      .note-block {
+        background-color: var(--surface-variant);
+        padding: 16px;
+        border-radius: 16px;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: var(--text-label);
+      }
+
+      .note-block h4 {
+        margin: 0 0 8px 0;
+        color: var(--primary);
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+
+      .note-block ul {
+        margin: 8px 0 0 0;
+        padding-left: 20px;
+      }
+
+      .tier-good { color: var(--tier-good); font-weight: bold; }
+      .tier-god { color: var(--tier-god); font-weight: bold; }
+
       /* Hover Styles */
-      button[onclick="calculateScore()"]:hover {
+      button[type="submit"]:hover {
         background-color: #bcd9ff;
         box-shadow:
           0 1px 3px rgba(0, 0, 0, 0.4),
@@ -144,7 +183,7 @@
         filter: brightness(1.1);
       }
 
-      button[onclick="resetForm()"]:hover {
+      button[type="reset"]:hover {
         background-color: #4a5468;
         box-shadow:
           0 1px 3px rgba(0, 0, 0, 0.4),
@@ -205,7 +244,6 @@
 
         <div class="input-group">
           <label>Crit Rate</label>
-          <!-- "Hilde best girl" by: whitecatdrops | github.com/whitecatdrops -->
           <input type="number" id="critRate" step="any" placeholder="0" />
         </div>
 
@@ -228,60 +266,78 @@
           <button type="submit">Submit</button>
           <button type="reset" onclick="resetForm()">Reset</button>
         </div>
-      </form>
 
-      <div class="result-section">
-        <div class="max-hint">Max Possible: 90 (100%)</div>
-        <div id="display">Gear Score: 0 (0%)</div>
-      </div>
+        <div class="result-section">
+          <div class="max-hint">Max Possible: 90 (100%)</div>
+          <div id="display">Gear Score: 0 (0%)</div>
+        </div>
+
+        <!-- Extra Note Section -->
+        <div class="notes-container">
+          <div class="note-block">
+            <h4>Relative Scoring Guide</h4>
+            Scores track roll quality dynamically based on your baseline. For example, on HP (%):
+            <ul>
+              <li>A absolute minimum roll of <strong>0.6%</strong> scores <strong>0 points</strong>.</li>
+              <li>A maximum perfect roll of <strong>1.6%</strong> scores <strong>10 points</strong>.</li>
+              <li>A perfect 9-roll gear configuration aggregates to a total maximum of <strong>90 points (100%)</strong>.</li>
+            </ul>
+          </div>
+          
+          <div class="note-block">
+            <h4>Gear Benchmarks</h4>
+            Evaluate your final gear quality against these endgame milestones:
+            <ul>
+              <li><strong>Below 50%:</strong> Placeholder or transition gear. Keep rolling!</li>
+              <li><span class="tier-good">50% - 75%: Good Gear</span>. Dependable choices perfectly tuned for running mid-to-high endgame progression.</li>
+              <li><span class="tier-god">>75%: Godlike Gear</span>. Exceptional drop optimization with near-perfect high stat rolls. Lock immediately.</li>
+            </ul>
+          </div>
+        </div>
+      </form>
     </div>
 
     <script>
       function calculateScore() {
-  const val = (id) => parseFloat(document.getElementById(id).value) || 0;
-  
-  const atk = val("attack");
-  const def = val("defense");
-  const hp = val("hp");
-  const flatAtk = val("flat-attack");
-  const flatDef = val("flat-defense");
-  const flatHp = val("flat-hp");
-  const spd = val("speed");
-  const cr = val("critRate");
-  const cd = val("critDamage");
-  const eh = val("effectHit");
-  const er = val("effectResist");
+        const val = (id) => parseFloat(document.getElementById(id).value) || 0;
+        const atk = val("attack");
+        const def = val("defense");
+        const hp = val("hp");
+        const flatAtk = val("flat-attack");
+        const flatDef = val("flat-defense");
+        const flatHp = val("flat-hp");
+        const spd = val("speed");
+        const cr = val("critRate");
+        const cd = val("critDamage");
+        const eh = val("effectHit");
+        const er = val("effectResist");
 
-  // Sum up the scores conditionally
-  let gearScore = 0;
+        let gearScore = 0;
 
-  if (spd > 0)       gearScore += (spd - 1);
-  if (flatAtk > 0)   gearScore += (flatAtk - 20) / 25;
-  if (flatDef > 0)   gearScore += (flatDef - 12) / 15;
-  if (flatHp > 0)    gearScore += (flatHp - 120) / 150;
-  if (atk > 0)       gearScore += (atk - 0.6) / 1.0;
-  if (def > 0)       gearScore += (def - 0.6) / 1.0;
-  if (hp > 0)        gearScore += (hp - 0.6) / 1.0;
-  if (cr > 0)        gearScore += (cr - 1.0) / 1.0;
-  if (cd > 0)        gearScore += (cd - 1.5) / 1.5;
-  if (eh > 0)        gearScore += (eh - 1.0) / 2.0;
-  if (er > 0)        gearScore += (er - 1.0) / 2.0;
+        if (spd > 0)       gearScore += (spd - 1);
+        if (flatAtk > 0)   gearScore += (flatAtk - 20) / 25;
+        if (flatDef > 0)   gearScore += (flatDef - 12) / 15;
+        if (flatHp > 0)    gearScore += (flatHp - 120) / 150;
+        if (atk > 0)       gearScore += (atk - 0.6) / 1.0;
+        if (def > 0)       gearScore += (def - 0.6) / 1.0;
+        if (hp > 0)        gearScore += (hp - 0.6) / 1.0;
+        if (cr > 0)        gearScore += (cr - 1.0) / 1.0;
+        if (cd > 0)        gearScore += (cd - 1.5) / 1.5;
+        if (eh > 0)        gearScore += (eh - 1.0) / 2.0;
+        if (er > 0)        gearScore += (er - 1.0) / 2.0;
 
-  // Multiply total by 10 at the end
-  gearScore *= 10;
+        gearScore *= 10;
+        if (gearScore < 0) gearScore = 0;
 
-  // Prevent any weird edge cases from dipping below 0
-  if (gearScore < 0) gearScore = 0;
+        const percentage = (gearScore / 90) * 100;
 
-  const percentage = (gearScore / 90) * 100;
-
-  document.getElementById("display").innerText =
-    "Gear Score: " +
-    gearScore.toFixed(2) +
-    " (" +
-    percentage.toFixed(2) +
-    "%)";
-}
+        document.getElementById("display").innerText =
+          "Gear Score: " +
+          gearScore.toFixed(2) +
+          " (" +
+          percentage.toFixed(2) +
+          "%)";
+      }
 
       function resetForm() {
         document.getElementById("gearForm").reset();
