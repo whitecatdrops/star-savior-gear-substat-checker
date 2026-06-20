@@ -251,19 +251,19 @@
         const eh = val("effectHit");
         const er = val("effectResist");
 
-        const gearScore =
-          (spd / 2 +
-            flatAtk / 45 +
-            flatDef / 27 +
-            flatHp / 270 +
-            atk / 1.6 +
-            def / 1.6 +
-            hp / 1.6 +
-            cr / 2 +
-            cd / 3 +
-            eh / 3 +
-            er / 3) *
-          10;
+        const gearScore = (
+    (spd - 1) +                         // Max 2, Min 1
+    (flatAtk - 20) / 25 +                   // Max 45, Min 20
+    (flatDef - 12) / 15 +                   // Max 27, Min 12
+    (flatHp - 120) / 150 +                  // Max 270, Min 120
+    (atk - 0.6) / 1.0 +                     // Max 1.6, Min 0.6
+    (def - 0.6) / 1.0 +                     // Max 1.6, Min 0.6
+    (hp - 0.6) / 1.0 +                      // Max 1.6, Min 0.6
+    (cr - 1.0) / 1.0 +                      // Max 2.0, Min 1.0
+    (cd - 1.5) / 1.5 +                      // Max 3.0, Min 1.5
+    (eh - 1.0) / 2.0 +                      // Max 3.0, Min 1.0
+    (er - 1.0) / 2.0                        // Max 3.0, Min 1.0
+) * 10;
 
         const percentage = (gearScore / 90) * 100;
 
