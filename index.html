@@ -298,36 +298,84 @@
     </div>
 
     <script>
+      // Defining the Min and Max values per single roll for each stat
+      const STAT_CONFIG = {
+        speed:        { min: 1,   max: 2   },
+        "flat-attack": { min: 20,  max: 45  },
+        "flat-defense":{ min: 12,  max: 27  },
+        "flat-hp":     { min: 120, max: 270 },
+        attack:       { min: 0.6, max: 1.6 },
+        defense:      { min: 0.6, max: 1.6 },
+        hp:            { min: 0.6, max: 1.6 },
+        critRate:     { min: 1.0, max: 2.0 },
+        critDamage:   { min: 1.5, max: 3.0 },
+        effectHit:    { min: 1.0, max: 3.0 },
+        effectResist: { min: 1.0, max: 3.0 }
+      };
+
       function calculateScore() {
+        let totalMinPossible = 0;
+        let totalMaxPossible = 0;
+        let totalCurrentValue = 0;
+        let activeStatsCount = 0;
+
+        // Loop through each configured stat to see what was entered
+        for (const [id, config] of Object.entries(STAT_CONFIG)) {
+          const value = parseFloat(document.getElementById(id).value) || 0;
+          
+          if (value > 0) {
+            activeStatsCount++;
+            totalCurrentValue += value;
+            
+            // Establishes scaling bounds based on the user input relative to the stat's min roll unit
+            // Since we assume an aggregate of 9 total rolls across the piece:
+            const estimatedRolls = value / config.min; 
+            
+            // Dynamic absolute constraints for the stats provided
+            totalMinPossible += (value); 
+          }
+        }
+
+        // --- Precise Approach for Multi-roll Gear Alignment ---
+        // To precisely match your criteria where Speed 9 = 0% and Max speed (18) = 100%:
+        // We calculate the point distribution explicitly.
+        
+        let gearScore = 0;
+        let maxPossibleScore = 90; // Fixed budget ceiling
+
+        // Alternative explicit calculation matching your single roll logic scaled to 9 rolls:
         const val = (id) => parseFloat(document.getElementById(id).value) || 0;
-        const atk = val("attack");
-        const def = val("defense");
-        const hp = val("hp");
+        
+        const spd = val("speed");
         const flatAtk = val("flat-attack");
         const flatDef = val("flat-defense");
         const flatHp = val("flat-hp");
-        const spd = val("speed");
+        const atk = val("attack");
+        const def = val("defense");
+        const hp = val("hp");
         const cr = val("critRate");
         const cd = val("critDamage");
         const eh = val("effectHit");
         const er = val("effectResist");
 
-        let gearScore = 0;
-
-        if (spd > 0)       gearScore += (spd - 1);
-        if (flatAtk > 0)   gearScore += (flatAtk - 20) / 25;
-        if (flatDef > 0)   gearScore += (flatDef - 12) / 15;
-        if (flatHp > 0)    gearScore += (flatHp - 120) / 150;
-        if (atk > 0)       gearScore += (atk - 0.6) / 1.0;
-        if (def > 0)       gearScore += (def - 0.6) / 1.0;
-        if (hp > 0)        gearScore += (hp - 0.6) / 1.0;
-        if (cr > 0)        gearScore += (cr - 1.0) / 1.0;
-        if (cd > 0)        gearScore += (cd - 1.5) / 1.5;
-        if (eh > 0)        gearScore += (eh - 1.0) / 2.0;
-        if (er > 0)        gearScore += (er - 1.0) / 2.0;
+        // Subtracting the baseline unit per roll. 
+        // If speed is 9 (9 rolls of 1), (9 - 9) / 1 = 0 points.
+        // If speed is 18 (9 rolls of 2), (18 - 9) / 1 = 9 points * 10 = 90 points.
+        if (spd > 0)       gearScore += (spd - 9) / 1;
+        if (flatAtk > 0)   gearScore += (flatAtk - 180) / 25; // 20 * 9 = 180 min
+        if (flatDef > 0)   gearScore += (flatDef - 108) / 15; // 12 * 9 = 108 min
+        if (flatHp > 0)    gearScore += (flatHp - 1080) / 150; // 120 * 9 = 1080 min
+        if (atk > 0)       gearScore += (atk - 5.4) / 1.0;  // 0.6 * 9 = 5.4 min
+        if (def > 0)       gearScore += (def - 5.4) / 1.0;
+        if (hp > 0)        gearScore += (hp - 5.4) / 1.0;
+        if (cr > 0)        gearScore += (cr - 9.0) / 1.0;   // 1.0 * 9 = 9.0 min
+        if (cd > 0)        gearScore += (cd - 13.5) / 1.5; // 1.5 * 9 = 13.5 min
+        if (eh > 0)        gearScore += (eh - 9.0) / 2.0;   // 1.0 * 9 = 9.0 min
+        if (er > 0)        gearScore += (er - 9.0) / 2.0;
 
         gearScore *= 10;
         if (gearScore < 0) gearScore = 0;
+        if (gearScore > 90) gearScore = 90;
 
         const percentage = (gearScore / 90) * 100;
 
