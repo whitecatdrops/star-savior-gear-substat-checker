@@ -268,11 +268,10 @@
         </div>
 
         <div class="result-section">
-          <div class="max-hint">Max Possible: 90 (100%)</div>
+          <div class="max-hint">Max Possible Gear Budget: 90 Points (100%)</div>
           <div id="display">Gear Score: 0 (0%)</div>
         </div>
 
-        <!-- Extra Note Section -->
         <div class="notes-container">
           <div class="note-block">
             <h4>Relative Scoring Guide</h4>
@@ -314,66 +313,95 @@
       };
 
       function calculateScore() {
-        let totalMinPossible = 0;
-        let totalMaxPossible = 0;
-        let totalCurrentValue = 0;
-        let activeStatsCount = 0;
-
-        // Loop through each configured stat to see what was entered
+        let activeStats = [];
+        
+        // 1. Gather all stats that the user actually filled out
         for (const [id, config] of Object.entries(STAT_CONFIG)) {
           const value = parseFloat(document.getElementById(id).value) || 0;
-          
           if (value > 0) {
-            activeStatsCount++;
-            totalCurrentValue += value;
-            
-            // Establishes scaling bounds based on the user input relative to the stat's min roll unit
-            // Since we assume an aggregate of 9 total rolls across the piece:
-            const estimatedRolls = value / config.min; 
-            
-            // Dynamic absolute constraints for the stats provided
-            totalMinPossible += (value); 
+            activeStats.push({ id, value, config });
           }
         }
 
-        // --- Precise Approach for Multi-roll Gear Alignment ---
-        // To precisely match your criteria where Speed 9 = 0% and Max speed (18) = 100%:
-        // We calculate the point distribution explicitly.
+        if (activeStats.length === 0) {
+          document.getElementById("display").innerText = "Gear Score: 0.00 (0.00%)";
+          return;
+        }
+
+        // 2. Estimate how many rolls went into each stat based on average roll values
+        let rollsDistribution = {};
+        let totalAssignedRolls = 0;
+
+        activeStats.forEach(stat => {
+          const avgRoll = (stat.config.min + stat.config.max) / 2;
+          // Every present stat must have at least 1 baseline roll
+          let estimatedRolls = Math.max(1, Math.round(stat.value / avgRoll));
+          rollsDistribution[stat.id] = estimatedRolls;
+          totalAssignedRolls += estimatedRolls;
+        });
+
+        // 3. Dynamically adjust assigned rolls so they perfectly fit the gear's 9-roll budget
+        const TOTAL_BUDGET_ROLLS = 9;
         
+        if (totalAssignedRolls !== TOTAL_BUDGET_ROLLS) {
+          // If we underestimated, hand out remaining rolls to stats furthest from their fractional roll targets
+          while (totalAssignedRolls < TOTAL_BUDGET_ROLLS) {
+            let bestStatId = null;
+            let maxDifference = -Infinity;
+            
+            activeStats.forEach(stat => {
+              const avgRoll = (stat.config.min + stat.config.max) / 2;
+              let fractionalRolls = stat.value / avgRoll;
+              let difference = fractionalRolls - rollsDistribution[stat.id];
+              if (difference > maxDifference) {
+                maxDifference = difference;
+                bestStatId = stat.id;
+              }
+            });
+            
+            rollsDistribution[bestStatId]++;
+            totalAssignedRolls++;
+          }
+
+          // If we overestimated, trim rolls from stats furthest above their fractional roll targets
+          while (totalAssignedRolls > TOTAL_BUDGET_ROLLS) {
+            let worstStatId = null;
+            let minDifference = Infinity;
+            
+            activeStats.forEach(stat => {
+              if (rollsDistribution[stat.id] > 1) { // Never strip a stat below its 1 baseline roll
+                const avgRoll = (stat.config.min + stat.config.max) / 2;
+                let fractionalRolls = stat.value / avgRoll;
+                let difference = fractionalRolls - rollsDistribution[stat.id];
+                if (difference < minDifference) {
+                  minDifference = difference;
+                  worstStatId = stat.id;
+                }
+              }
+            });
+            
+            if (!worstStatId) break; // Safeguard loop
+            rollsDistribution[worstStatId]--;
+            totalAssignedRolls--;
+          }
+        }
+
+        // 4. Calculate the roll efficiency scores across the dynamically allocated roll budget
         let gearScore = 0;
-        let maxPossibleScore = 90; // Fixed budget ceiling
 
-        // Alternative explicit calculation matching your single roll logic scaled to 9 rolls:
-        const val = (id) => parseFloat(document.getElementById(id).value) || 0;
-        
-        const spd = val("speed");
-        const flatAtk = val("flat-attack");
-        const flatDef = val("flat-defense");
-        const flatHp = val("flat-hp");
-        const atk = val("attack");
-        const def = val("defense");
-        const hp = val("hp");
-        const cr = val("critRate");
-        const cd = val("critDamage");
-        const eh = val("effectHit");
-        const er = val("effectResist");
+        activeStats.forEach(stat => {
+          const assignedRolls = rollsDistribution[stat.id];
+          const minPossibleValue = assignedRolls * stat.config.min;
+          const maxPossibleValue = assignedRolls * stat.config.max;
+          
+          // Linear score contribution matching your logic: min roll = 0 pts, max roll = 10 pts
+          let statScore = ((stat.value - minPossibleValue) / (maxPossibleValue - minPossibleValue)) * (assignedRolls * 10);
+          
+          if (isNaN(statScore) || statScore < 0) statScore = 0;
+          gearScore += statScore;
+        });
 
-        // Subtracting the baseline unit per roll. 
-        // If speed is 9 (9 rolls of 1), (9 - 9) / 1 = 0 points.
-        // If speed is 18 (9 rolls of 2), (18 - 9) / 1 = 9 points * 10 = 90 points.
-        if (spd > 0)       gearScore += (spd - 9) / 1;
-        if (flatAtk > 0)   gearScore += (flatAtk - 180) / 25; // 20 * 9 = 180 min
-        if (flatDef > 0)   gearScore += (flatDef - 108) / 15; // 12 * 9 = 108 min
-        if (flatHp > 0)    gearScore += (flatHp - 1080) / 150; // 120 * 9 = 1080 min
-        if (atk > 0)       gearScore += (atk - 5.4) / 1.0;  // 0.6 * 9 = 5.4 min
-        if (def > 0)       gearScore += (def - 5.4) / 1.0;
-        if (hp > 0)        gearScore += (hp - 5.4) / 1.0;
-        if (cr > 0)        gearScore += (cr - 9.0) / 1.0;   // 1.0 * 9 = 9.0 min
-        if (cd > 0)        gearScore += (cd - 13.5) / 1.5; // 1.5 * 9 = 13.5 min
-        if (eh > 0)        gearScore += (eh - 9.0) / 2.0;   // 1.0 * 9 = 9.0 min
-        if (er > 0)        gearScore += (er - 9.0) / 2.0;
-
-        gearScore *= 10;
+        // Cap values safely between 0 and 90
         if (gearScore < 0) gearScore = 0;
         if (gearScore > 90) gearScore = 90;
 
