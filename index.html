@@ -59,6 +59,10 @@
         flex-direction: column;
       }
 
+      .input-group.full-width {
+        grid-column: 1 / -1;
+      }
+
       label {
         font-size: 0.85rem;
         margin-bottom: 8px;
@@ -67,7 +71,7 @@
         font-weight: 500;
       }
 
-      input {
+      input, select {
         background: transparent;
         border: 1px solid var(--outline);
         border-radius: 4px;
@@ -80,7 +84,17 @@
         outline: none;
       }
 
-      input:focus {
+      select {
+        background-color: var(--surface-variant);
+        cursor: pointer;
+      }
+
+      select option {
+        background-color: var(--surface-variant);
+        color: white;
+      }
+
+      input:focus, select:focus {
         border-color: var(--primary);
         box-shadow: 0 0 0 1px var(--primary);
       }
@@ -213,7 +227,7 @@
         </div>
 
         <div class="input-group">
-          <label>Attack</label>
+          <label>Attack (Flat)</label>
           <input type="number" id="flat-attack" step="any" placeholder="0" />
         </div>
 
@@ -223,7 +237,7 @@
         </div>
 
         <div class="input-group">
-          <label>Defense</label>
+          <label>Defense (Flat)</label>
           <input type="number" id="flat-defense" step="any" placeholder="0" />
         </div>
 
@@ -233,7 +247,7 @@
         </div>
 
         <div class="input-group">
-          <label>HP</label>
+          <label>HP (Flat)</label>
           <input type="number" id="flat-hp" step="any" placeholder="0" />
         </div>
 
@@ -260,6 +274,14 @@
         <div class="input-group">
           <label>Effect Resist</label>
           <input type="number" id="effectResist" step="any" placeholder="0" />
+        </div>
+
+        <div class="input-group full-width">
+          <label>Weighted Flat Stats</label>
+          <select id="weightedFlats">
+            <option value="no">No (Normal Calculation)</option>
+            <option value="yes">Yes (Halve Flat Stat Contribution Score)</option>
+          </select>
         </div>
 
         <div class="actions">
@@ -314,6 +336,7 @@
 
       function calculateScore() {
         let activeStats = [];
+        const useWeightedFlats = document.getElementById("weightedFlats").value === "yes";
         
         // 1. Gather all stats that the user actually filled out
         for (const [id, config] of Object.entries(STAT_CONFIG)) {
@@ -334,7 +357,6 @@
 
         activeStats.forEach(stat => {
           const avgRoll = (stat.config.min + stat.config.max) / 2;
-          // Every present stat must have at least 1 baseline roll
           let estimatedRolls = Math.max(1, Math.round(stat.value / avgRoll));
           rollsDistribution[stat.id] = estimatedRolls;
           totalAssignedRolls += estimatedRolls;
@@ -344,7 +366,6 @@
         const TOTAL_BUDGET_ROLLS = 9;
         
         if (totalAssignedRolls !== TOTAL_BUDGET_ROLLS) {
-          // If we underestimated, hand out remaining rolls to stats furthest from their fractional roll targets
           while (totalAssignedRolls < TOTAL_BUDGET_ROLLS) {
             let bestStatId = null;
             let maxDifference = -Infinity;
@@ -363,13 +384,12 @@
             totalAssignedRolls++;
           }
 
-          // If we overestimated, trim rolls from stats furthest above their fractional roll targets
           while (totalAssignedRolls > TOTAL_BUDGET_ROLLS) {
             let worstStatId = null;
             let minDifference = Infinity;
             
             activeStats.forEach(stat => {
-              if (rollsDistribution[stat.id] > 1) { // Never strip a stat below its 1 baseline roll
+              if (rollsDistribution[stat.id] > 1) {
                 const avgRoll = (stat.config.min + stat.config.max) / 2;
                 let fractionalRolls = stat.value / avgRoll;
                 let difference = fractionalRolls - rollsDistribution[stat.id];
@@ -380,13 +400,13 @@
               }
             });
             
-            if (!worstStatId) break; // Safeguard loop
+            if (!worstStatId) break;
             rollsDistribution[worstStatId]--;
             totalAssignedRolls--;
           }
         }
 
-        // 4. Calculate the roll efficiency scores across the dynamically allocated roll budget
+        // 4. Calculate the roll efficiency scores
         let gearScore = 0;
 
         activeStats.forEach(stat => {
@@ -394,10 +414,14 @@
           const minPossibleValue = assignedRolls * stat.config.min;
           const maxPossibleValue = assignedRolls * stat.config.max;
           
-          // Linear score contribution matching your logic: min roll = 0 pts, max roll = 10 pts
           let statScore = ((stat.value - minPossibleValue) / (maxPossibleValue - minPossibleValue)) * (assignedRolls * 10);
-          
           if (isNaN(statScore) || statScore < 0) statScore = 0;
+
+          // Apply weights if choice is 'yes' and stat is flat attack, flat HP, or flat defense
+          if (useWeightedFlats && ["flat-attack", "flat-hp", "flat-defense"].includes(stat.id)) {
+            statScore /= 2;
+          }
+          
           gearScore += statScore;
         });
 
