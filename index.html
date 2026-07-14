@@ -319,20 +319,20 @@
         <div class="notes-container">
           <div class="note-block">
             <h4>Relative Scoring Guide</h4>
-            Scores track roll quality dynamically based on your baseline. For
-            example, on HP (%):
+            Scores are calculated based on how close your roll is to the
+            absolute maximum.
             <ul>
               <li>
-                A absolute minimum roll of <strong>0.6%</strong> scores
-                <strong>0 points</strong>.
+                A <strong>perfect roll</strong> awards 10 points per roll.
               </li>
               <li>
-                A maximum perfect roll of <strong>1.6%</strong> scores
-                <strong>10 points</strong>.
+                A <strong>sub-optimal roll</strong> awards a percentage of those
+                10 points based on the ratio of your value to the maximum
+                possible value.
               </li>
               <li>
-                A perfect 9-roll gear configuration aggregates to a total
-                maximum of <strong>90 points (100%)</strong>.
+                A perfect 9-roll gear configuration aggregates to a maximum of
+                <strong>90 points (100%)</strong>.
               </li>
             </ul>
           </div>
@@ -459,16 +459,16 @@
 
         activeStats.forEach((stat) => {
           const assignedRolls = rollsDistribution[stat.id];
-          const minPossibleValue = assignedRolls * stat.config.min;
+          // Calculate max possible value for this specific number of rolls
           const maxPossibleValue = assignedRolls * stat.config.max;
 
+          // Revised Logic: (Actual / Max) * (Rolls * 10)
           let statScore =
-            ((stat.value - minPossibleValue) /
-              (maxPossibleValue - minPossibleValue)) *
-            (assignedRolls * 10);
+            (stat.value / maxPossibleValue) * (assignedRolls * 10);
+
           if (isNaN(statScore) || statScore < 0) statScore = 0;
 
-          // Apply weights if choice is 'yes' and stat is flat attack, flat HP, or flat defense
+          // Apply weights if choice is 'yes' and stat is a flat stat
           if (
             useWeightedFlats &&
             ["flat-attack", "flat-hp", "flat-defense"].includes(stat.id)
