@@ -297,6 +297,14 @@
       const totalPoints = document.getElementById("total-points-placeholder");
       const totalPercent = document.getElementById("total-percent-placeholder");
 
+      // Listen for 'Enter' keypresses anywhere inside the form
+      form.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault(); // Prevent default enter behavior
+          document.getElementById("submitBtn").click(); // Manually click the submit button
+        }
+      });
+
       form.addEventListener("submit", function (e) {
         e.preventDefault();
 
