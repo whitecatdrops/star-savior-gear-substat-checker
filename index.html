@@ -3,500 +3,363 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>[StarSavior] Gear Substats Checker</title>
+    <title>『StarSavior』Gear Substats Checker</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+    <script type="module">
+      import "@material/web/all.js";
+    </script>
+
     <style>
       :root {
-        --bg-color: #1a1c1e;
-        --surface: #202429;
-        --surface-variant: #2a2f35;
-        --primary: #d1e4ff;
-        --on-primary: #003258;
-        --secondary-container: #3e4759;
-        --on-secondary-container: #d7e3f7;
-        --outline: #8e9199;
-        --text-main: #e2e2e6;
-        --text-label: #bec7cf;
-        --tier-good: #8cd6ff;
-        --tier-god: #ffd700;
+        /* Neutral Dark Theme */
+        --md-sys-color-background: #1b1d21;
+        --md-sys-color-on-background: #edf2f7;
+
+        --md-sys-color-surface: #25282d;
+        --md-sys-color-on-surface: #f8fafc;
+
+        --md-sys-color-surface-variant: #31363d;
+        --md-sys-color-on-surface-variant: #d8dee9;
+
+        --md-sys-color-outline-variant: #49515b;
+
+        /* Blue Accent */
+        --md-sys-color-primary: #7dd3fc;
+        --md-sys-color-on-primary: #082f49;
+        --md-sys-color-primary-container: #1e3a5f;
+        --md-sys-color-on-primary-container: #dbeafe;
+
+        --card-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      }
+      md-outlined-text-field {
+        width: 100%;
+
+        --md-outlined-text-field-focus-outline-color: #7dd3fc;
+        --md-outlined-text-field-focus-label-text-color: #7dd3fc;
+        --md-outlined-text-field-caret-color: #7dd3fc;
+      }
+      md-filled-button {
+        --md-filled-button-container-color: #3b4d66;
+        --md-filled-button-label-text-color: #ffffff;
+      }
+
+      md-text-button {
+        --md-text-button-label-text-color: #7dd3fc;
       }
 
       body {
-        background-color: var(--bg-color);
-        color: var(--text-main);
         font-family: "Roboto", sans-serif;
+        background: linear-gradient(180deg, #1b1b1f 0%, #202126 100%);
+        color: var(--md-sys-color-on-background);
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 2rem;
+        justify-content: center;
+        padding: 2rem 1rem;
         margin: 0;
+        min-height: 100vh;
       }
 
-      .card {
-        background-color: var(--surface);
-        padding: 24px;
-        border-radius: 28px;
+      .container {
+        background: var(--md-sys-color-surface);
+        padding: 32px;
+        border-radius: 24px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        max-width: 600px;
         width: 100%;
-        max-width: 800px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
 
       h2 {
         margin-top: 0;
-        font-weight: 400;
-        color: var(--primary);
+        margin-bottom: 24px;
+        font-weight: 600;
         text-align: center;
-        grid-column: 1 / -1;
+        color: #fafafa;
       }
 
-      #gearForm {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-      }
-
-      .input-group {
+      form {
         display: flex;
         flex-direction: column;
+        gap: 16px;
       }
 
-      .input-group.full-width {
-        grid-column: 1 / -1;
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
       }
 
-      label {
-        font-size: 0.85rem;
-        margin-bottom: 8px;
-        margin-left: 4px;
-        color: var(--text-label);
-        font-weight: 500;
+      @media (max-width: 500px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
       }
 
-      input,
-      select {
-        background: transparent;
-        border: 1px solid var(--outline);
-        border-radius: 4px;
-        padding: 12px;
-        color: white;
-        font-size: 1rem;
-        transition:
-          border-color 0.2s ease,
-          box-shadow 0.2s ease;
-        outline: none;
+      md-outlined-text-field {
+        width: 100%;
       }
 
-      select {
-        background-color: var(--surface-variant);
-        cursor: pointer;
-      }
-
-      select option {
-        background-color: var(--surface-variant);
-        color: white;
-      }
-
-      input:focus,
-      select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 1px var(--primary);
-      }
-
-      .actions {
-        grid-column: 1 / -1;
+      .buttons {
         display: flex;
         gap: 12px;
-        margin-top: 24px;
+        justify-content: flex-end;
+        margin-top: 16px;
+        margin-bottom: 24px;
       }
 
-      button {
-        flex: 1;
-        padding: 12px;
-        border-radius: 100px;
-        border: none;
-        font-weight: 500;
-        cursor: pointer;
-        transition:
-          transform 0.1s,
-          opacity 0.2s;
-      }
-
-      button:active {
-        transform: scale(0.97);
-      }
-
-      button[type="submit"] {
-        background-color: var(--primary);
-        color: var(--on-primary);
-      }
-
-      button[type="reset"] {
-        background-color: var(--secondary-container);
-        color: var(--on-secondary-container);
-      }
-
-      .result-section {
-        grid-column: 1 / -1;
-        margin-top: 24px;
-        padding: 16px;
-        border-top: 1px solid var(--secondary-container);
-        text-align: center;
-      }
-
-      #display {
-        font-size: 1.25rem;
-        font-weight: 500;
-        color: var(--primary);
-        margin-top: 8px;
-      }
-
-      .max-hint {
-        font-size: 0.8rem;
-        opacity: 0.7;
-      }
-
-      /* Extra Notes Styling */
-      .notes-container {
-        grid-column: 1 / -1;
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 1px dashed var(--secondary-container);
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 16px;
-        text-align: left;
-      }
-
-      .note-block {
-        background-color: var(--surface-variant);
-        padding: 16px;
+      #result-card {
+        padding: 20px;
+        background: var(--md-sys-color-surface-variant);
+        color: var(--md-sys-color-on-surface-variant);
         border-radius: 16px;
-        font-size: 0.85rem;
-        line-height: 1.5;
-        color: var(--text-label);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: none;
       }
 
-      .note-block h4 {
-        margin: 0 0 8px 0;
-        color: var(--primary);
-        font-weight: 500;
-        font-size: 0.95rem;
+      #result-card.visible {
+        display: block;
       }
 
-      .note-block ul {
-        margin: 8px 0 0 0;
-        padding-left: 20px;
+      /* Styles for the new placeholders */
+      .placeholder-text {
+        text-align: center;
+        font-style: italic;
+        opacity: 0.8;
       }
 
-      .tier-good {
-        color: var(--tier-good);
-        font-weight: bold;
-      }
-      .tier-god {
-        color: var(--tier-god);
-        font-weight: bold;
-      }
-
-      /* Hover Styles */
-      button[type="submit"]:hover {
-        background-color: #bcd9ff;
-        box-shadow:
-          0 1px 3px rgba(0, 0, 0, 0.4),
-          0 4px 8px rgba(0, 0, 0, 0.2);
-        filter: brightness(1.1);
+      .stat-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       }
 
-      button[type="reset"]:hover {
-        background-color: #4a5468;
-        box-shadow:
-          0 1px 3px rgba(0, 0, 0, 0.4),
-          0 4px 8px rgba(0, 0, 0, 0.2);
+      hr {
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        margin: 16px 0;
       }
 
-      button:focus-visible {
-        outline: 2px solid var(--primary);
-        outline-offset: 2px;
+      .summary-line {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+        color: #ffffff;
+      }
+
+      md-outlined-text-field {
+        width: 100%;
+        --md-outlined-text-field-container-shape: 14px;
       }
     </style>
   </head>
   <body>
-    <div class="card">
+    <div class="container">
       <h2>『StarSavior』Gear Substats Checker</h2>
 
-      <form
-        id="gearForm"
-        onsubmit="
-          calculateScore();
-          return false;
-        "
-      >
-        <div class="input-group">
-          <label>Attack (%)</label>
-          <input type="number" id="attack" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Attack (Flat)</label>
-          <input type="number" id="flat-attack" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Defense (%)</label>
-          <input type="number" id="defense" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Defense (Flat)</label>
-          <input type="number" id="flat-defense" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>HP (%)</label>
-          <input type="number" id="hp" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>HP (Flat)</label>
-          <input type="number" id="flat-hp" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Speed</label>
-          <input type="number" id="speed" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Crit Rate</label>
-          <input type="number" id="critRate" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Crit Damage</label>
-          <input type="number" id="critDamage" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Effect Hit</label>
-          <input type="number" id="effectHit" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Effect Resist</label>
-          <input type="number" id="effectResist" step="any" placeholder="0" />
-        </div>
-
-        <div class="input-group">
-          <label>Unusable Stats (Integer Only)</label>
-          <input
+      <form id="statForm">
+        <div class="grid">
+          <md-outlined-text-field
+            id="speed"
+            label="Speed"
             type="number"
-            id="unusableStats"
-            step="1"
-            min="0"
-            max="8"
-            placeholder="0"
-          />
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="flat-attack"
+            label="Flat Attack"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="flat-defense"
+            label="Flat Defense"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="flat-hp"
+            label="Flat HP"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="attack"
+            label="Attack %"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="defense"
+            label="Defense %"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="hp"
+            label="HP %"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="critRate"
+            label="Crit Rate"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="critDamage"
+            label="Crit Damage"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="effectHit"
+            label="Effect Hit"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
+          <md-outlined-text-field
+            id="effectResist"
+            label="Effect Resist"
+            type="number"
+            step="any"
+          ></md-outlined-text-field>
         </div>
 
-        <div class="input-group full-width">
-          <label>Weighted Flat Stats</label>
-          <select id="weightedFlats">
-            <option value="no">No (Normal Calculation)</option>
-            <option value="yes">
-              Yes (Halve Flat Stat Contribution Score)
-            </option>
-          </select>
-        </div>
-
-        <div class="actions">
-          <button type="submit">Submit</button>
-          <button type="reset" onclick="resetForm()">Reset</button>
-        </div>
-
-        <div class="result-section">
-          <div class="max-hint">Max Possible Gear Budget: 90 Points (100%)</div>
-          <div id="display">Gear Score: 0 (0%)</div>
-        </div>
-
-        <div class="notes-container">
-          <div class="note-block">
-            <h4>Relative Scoring Guide</h4>
-            Scores are calculated based on how close your roll is to the
-            absolute maximum.
-            <ul>
-              <li>
-                A <strong>perfect roll</strong> awards 10 points per roll.
-              </li>
-              <li>
-                A <strong>sub-optimal roll</strong> awards a percentage of those
-                10 points based on the ratio of your value to the maximum
-                possible value.
-              </li>
-              <li>
-                A perfect 9-roll gear configuration aggregates to a maximum of
-                <strong>90 points (100%)</strong>.
-              </li>
-            </ul>
-          </div>
-
-          <div class="note-block">
-            <h4>Gear Benchmarks</h4>
-            Evaluate your final gear quality against these endgame milestones:
-            <ul>
-              <li>
-                <strong>Below 50%:</strong> Placeholder or transition gear. Keep
-                rolling!
-              </li>
-              <li>
-                <span class="tier-good">50% - 75%: Good Gear</span>. Dependable
-                choices perfectly tuned for running mid-to-high endgame
-                progression.
-              </li>
-              <li>
-                <span class="tier-god">>75%: Godlike Gear</span>. Exceptional
-                drop optimization with near-perfect high stat rolls. Lock
-                immediately.
-              </li>
-            </ul>
-          </div>
+        <div class="buttons">
+          <md-text-button type="button" id="resetBtn">Reset</md-text-button>
+          <md-filled-button type="submit" id="submitBtn"
+            >Calculate</md-filled-button
+          >
         </div>
       </form>
+
+      <div id="result-card">
+        <div id="result-placeholder" class="placeholder-text">
+          Waiting for calculation...
+        </div>
+
+        <div id="result-data" style="display: none">
+          <div id="stat-breakdown-placeholder"></div>
+          <hr />
+          <div class="summary-line">
+            <span>Total:</span>
+            <span id="total-points-placeholder"></span>
+          </div>
+          <div class="summary-line">
+            <span>Percentage:</span>
+            <span id="total-percent-placeholder"></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-      // Defining the Min and Max values per single roll for each stat
-      const STAT_CONFIG = {
-        speed: { min: 1, max: 2 },
-        "flat-attack": { min: 20, max: 45 },
-        "flat-defense": { min: 12, max: 27 },
-        "flat-hp": { min: 120, max: 270 },
-        attack: { min: 0.6, max: 1.6 },
-        defense: { min: 0.6, max: 1.6 },
-        hp: { min: 0.6, max: 1.6 },
-        critRate: { min: 1.0, max: 2.0 },
-        critDamage: { min: 1.5, max: 3.0 },
-        effectHit: { min: 1.0, max: 3.0 },
-        effectResist: { min: 1.0, max: 3.0 },
+      const stats = {
+        speed: { max: 2, label: "Speed" },
+        "flat-attack": { max: 90, label: "Flat Attack" },
+        "flat-defense": { max: 54, label: "Flat Defense" },
+        "flat-hp": { max: 540, label: "Flat HP" },
+        attack: { max: 1.6, label: "Attack %" },
+        defense: { max: 1.6, label: "Defense %" },
+        hp: { max: 1.6, label: "HP %" },
+        critRate: { max: 2.0, label: "Crit Rate" },
+        critDamage: { max: 3.0, label: "Crit Damage" },
+        effectHit: { max: 3.0, label: "Effect Hit" },
+        effectResist: { max: 3.0, label: "Effect Resist" },
       };
 
-      function calculateScore() {
-        let activeStats = [];
-        const useWeightedFlats =
-          document.getElementById("weightedFlats").value === "yes";
-        const unusableStats =
-          parseInt(document.getElementById("unusableStats").value) || 0;
+      const form = document.getElementById("statForm");
+      const resultCard = document.getElementById("result-card");
+      const resetBtn = document.getElementById("resetBtn");
 
-        // 1. Gather all stats that the user actually filled out
-        for (const [id, config] of Object.entries(STAT_CONFIG)) {
-          const value = parseFloat(document.getElementById(id).value) || 0;
-          if (value > 0) {
-            activeStats.push({ id, value, config });
+      // Grab our placeholders
+      const placeholderText = document.getElementById("result-placeholder");
+      const resultData = document.getElementById("result-data");
+      const statBreakdown = document.getElementById(
+        "stat-breakdown-placeholder",
+      );
+      const totalPoints = document.getElementById("total-points-placeholder");
+      const totalPercent = document.getElementById("total-percent-placeholder");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        let total = 0;
+        let breakdownHTML = "";
+
+        for (const key in stats) {
+          const input = document.getElementById(key);
+          const value = parseFloat(input.value);
+
+          if (!isNaN(value) && value > 0) {
+            const x = (value / stats[key].max) * 10;
+            total += x;
+            // Build HTML directly for the individual stats instead of pushing to an array
+            breakdownHTML += `
+              <div class="stat-line">
+                <span>${stats[key].label}:</span>
+                <span>${x.toFixed(2)} points</span>
+              </div>
+            `;
           }
         }
 
-        if (activeStats.length === 0) {
-          document.getElementById("display").innerText =
-            "Gear Score: 0.00 (0.00%)";
+        resultCard.classList.add("visible");
+
+        if (breakdownHTML === "") {
+          // Show error in the main placeholder if nothing was entered
+          placeholderText.textContent =
+            "Please enter at least one stat to calculate.";
+          placeholderText.style.display = "block";
+          resultData.style.display = "none";
           return;
         }
 
-        // 2. Estimate how many rolls went into each stat based on average roll values
-        let rollsDistribution = {};
-        let totalAssignedRolls = 0;
+        const z = (total / 90) * 100;
 
-        activeStats.forEach((stat) => {
-          const avgRoll = (stat.config.min + stat.config.max) / 2;
-          let estimatedRolls = Math.max(1, Math.round(stat.value / avgRoll));
-          rollsDistribution[stat.id] = estimatedRolls;
-          totalAssignedRolls += estimatedRolls;
-        });
+        // Edit the placeholders with the new calculated values
+        statBreakdown.innerHTML = breakdownHTML;
+        totalPoints.textContent = `${total.toFixed(2)} points`;
+        totalPercent.textContent = `${z.toFixed(2)}%`;
 
-        // 3. Dynamically adjust assigned rolls so they perfectly fit the gear's 9-roll budget
-        const TOTAL_BUDGET_ROLLS = 9;
-        const usableBudget = Math.max(0, TOTAL_BUDGET_ROLLS - unusableStats);
+        // Hide the waiting text and show the data
+        placeholderText.style.display = "none";
+        resultData.style.display = "block";
+      });
 
-        if (totalAssignedRolls !== usableBudget) {
-          while (totalAssignedRolls < usableBudget) {
-            let bestStatId = null;
-            let maxDifference = -Infinity;
-
-            activeStats.forEach((stat) => {
-              const avgRoll = (stat.config.min + stat.config.max) / 2;
-              let fractionalRolls = stat.value / avgRoll;
-              let difference = fractionalRolls - rollsDistribution[stat.id];
-              if (difference > maxDifference) {
-                maxDifference = difference;
-                bestStatId = stat.id;
-              }
-            });
-
-            rollsDistribution[bestStatId]++;
-            totalAssignedRolls++;
-          }
-
-          while (totalAssignedRolls > usableBudget) {
-            let worstStatId = null;
-            let minDifference = Infinity;
-
-            activeStats.forEach((stat) => {
-              if (rollsDistribution[stat.id] > 1) {
-                const avgRoll = (stat.config.min + stat.config.max) / 2;
-                let fractionalRolls = stat.value / avgRoll;
-                let difference = fractionalRolls - rollsDistribution[stat.id];
-                if (difference < minDifference) {
-                  minDifference = difference;
-                  worstStatId = stat.id;
-                }
-              }
-            });
-
-            if (!worstStatId) break;
-            rollsDistribution[worstStatId]--;
-            totalAssignedRolls--;
-          }
+      resetBtn.addEventListener("click", () => {
+        // Reset all text fields
+        for (const key in stats) {
+          document.getElementById(key).value = "";
         }
 
-        // 4. Calculate the roll efficiency scores
-        let gearScore = 0;
+        // Clear placeholders back to empty states
+        statBreakdown.innerHTML = "";
+        totalPoints.textContent = "";
+        totalPercent.textContent = "";
 
-        activeStats.forEach((stat) => {
-          const assignedRolls = rollsDistribution[stat.id];
-          // Calculate max possible value for this specific number of rolls
-          const maxPossibleValue = assignedRolls * stat.config.max;
-
-          // Revised Logic: (Actual / Max) * (Rolls * 10)
-          let statScore =
-            (stat.value / maxPossibleValue) * (assignedRolls * 10);
-
-          if (isNaN(statScore) || statScore < 0) statScore = 0;
-
-          // Apply weights if choice is 'yes' and stat is a flat stat
-          if (
-            useWeightedFlats &&
-            ["flat-attack", "flat-hp", "flat-defense"].includes(stat.id)
-          ) {
-            statScore /= 2;
-          }
-
-          gearScore += statScore;
-        });
-
-        // Cap values safely between 0 and 90
-        if (gearScore < 0) gearScore = 0;
-        if (gearScore > 90) gearScore = 90;
-
-        const percentage = (gearScore / 90) * 100;
-
-        document.getElementById("display").innerText =
-          "Gear Score: " +
-          gearScore.toFixed(2) +
-          " (" +
-          percentage.toFixed(2) +
-          "%)";
-      }
-
-      function resetForm() {
-        document.getElementById("gearForm").reset();
-        document.getElementById("display").innerText = "Gear Score: 0 (0%)";
-      }
+        // Reset visibility back to default state
+        placeholderText.textContent = "Waiting for calculation...";
+        placeholderText.style.display = "block";
+        resultData.style.display = "none";
+        resultCard.classList.remove("visible");
+      });
     </script>
   </body>
 </html>
