@@ -71,7 +71,8 @@
         font-weight: 500;
       }
 
-      input, select {
+      input,
+      select {
         background: transparent;
         border: 1px solid var(--outline);
         border-radius: 4px;
@@ -94,7 +95,8 @@
         color: white;
       }
 
-      input:focus, select:focus {
+      input:focus,
+      select:focus {
         border-color: var(--primary);
         box-shadow: 0 0 0 1px var(--primary);
       }
@@ -185,8 +187,14 @@
         padding-left: 20px;
       }
 
-      .tier-good { color: var(--tier-good); font-weight: bold; }
-      .tier-god { color: var(--tier-god); font-weight: bold; }
+      .tier-good {
+        color: var(--tier-good);
+        font-weight: bold;
+      }
+      .tier-god {
+        color: var(--tier-god);
+        font-weight: bold;
+      }
 
       /* Hover Styles */
       button[type="submit"]:hover {
@@ -276,11 +284,25 @@
           <input type="number" id="effectResist" step="any" placeholder="0" />
         </div>
 
+        <div class="input-group">
+          <label>Unusable Stats (Integer Only)</label>
+          <input
+            type="number"
+            id="unusableStats"
+            step="1"
+            min="0"
+            max="8"
+            placeholder="0"
+          />
+        </div>
+
         <div class="input-group full-width">
           <label>Weighted Flat Stats</label>
           <select id="weightedFlats">
             <option value="no">No (Normal Calculation)</option>
-            <option value="yes">Yes (Halve Flat Stat Contribution Score)</option>
+            <option value="yes">
+              Yes (Halve Flat Stat Contribution Score)
+            </option>
           </select>
         </div>
 
@@ -297,21 +319,42 @@
         <div class="notes-container">
           <div class="note-block">
             <h4>Relative Scoring Guide</h4>
-            Scores track roll quality dynamically based on your baseline. For example, on HP (%):
+            Scores track roll quality dynamically based on your baseline. For
+            example, on HP (%):
             <ul>
-              <li>A absolute minimum roll of <strong>0.6%</strong> scores <strong>0 points</strong>.</li>
-              <li>A maximum perfect roll of <strong>1.6%</strong> scores <strong>10 points</strong>.</li>
-              <li>A perfect 9-roll gear configuration aggregates to a total maximum of <strong>90 points (100%)</strong>.</li>
+              <li>
+                A absolute minimum roll of <strong>0.6%</strong> scores
+                <strong>0 points</strong>.
+              </li>
+              <li>
+                A maximum perfect roll of <strong>1.6%</strong> scores
+                <strong>10 points</strong>.
+              </li>
+              <li>
+                A perfect 9-roll gear configuration aggregates to a total
+                maximum of <strong>90 points (100%)</strong>.
+              </li>
             </ul>
           </div>
-          
+
           <div class="note-block">
             <h4>Gear Benchmarks</h4>
             Evaluate your final gear quality against these endgame milestones:
             <ul>
-              <li><strong>Below 50%:</strong> Placeholder or transition gear. Keep rolling!</li>
-              <li><span class="tier-good">50% - 75%: Good Gear</span>. Dependable choices perfectly tuned for running mid-to-high endgame progression.</li>
-              <li><span class="tier-god">>75%: Godlike Gear</span>. Exceptional drop optimization with near-perfect high stat rolls. Lock immediately.</li>
+              <li>
+                <strong>Below 50%:</strong> Placeholder or transition gear. Keep
+                rolling!
+              </li>
+              <li>
+                <span class="tier-good">50% - 75%: Good Gear</span>. Dependable
+                choices perfectly tuned for running mid-to-high endgame
+                progression.
+              </li>
+              <li>
+                <span class="tier-god">>75%: Godlike Gear</span>. Exceptional
+                drop optimization with near-perfect high stat rolls. Lock
+                immediately.
+              </li>
             </ul>
           </div>
         </div>
@@ -321,23 +364,26 @@
     <script>
       // Defining the Min and Max values per single roll for each stat
       const STAT_CONFIG = {
-        speed:        { min: 1,   max: 2   },
-        "flat-attack": { min: 20,  max: 45  },
-        "flat-defense":{ min: 12,  max: 27  },
-        "flat-hp":     { min: 120, max: 270 },
-        attack:       { min: 0.6, max: 1.6 },
-        defense:      { min: 0.6, max: 1.6 },
-        hp:            { min: 0.6, max: 1.6 },
-        critRate:     { min: 1.0, max: 2.0 },
-        critDamage:   { min: 1.5, max: 3.0 },
-        effectHit:    { min: 1.0, max: 3.0 },
-        effectResist: { min: 1.0, max: 3.0 }
+        speed: { min: 1, max: 2 },
+        "flat-attack": { min: 20, max: 45 },
+        "flat-defense": { min: 12, max: 27 },
+        "flat-hp": { min: 120, max: 270 },
+        attack: { min: 0.6, max: 1.6 },
+        defense: { min: 0.6, max: 1.6 },
+        hp: { min: 0.6, max: 1.6 },
+        critRate: { min: 1.0, max: 2.0 },
+        critDamage: { min: 1.5, max: 3.0 },
+        effectHit: { min: 1.0, max: 3.0 },
+        effectResist: { min: 1.0, max: 3.0 },
       };
 
       function calculateScore() {
         let activeStats = [];
-        const useWeightedFlats = document.getElementById("weightedFlats").value === "yes";
-        
+        const useWeightedFlats =
+          document.getElementById("weightedFlats").value === "yes";
+        const unusableStats =
+          parseInt(document.getElementById("unusableStats").value) || 0;
+
         // 1. Gather all stats that the user actually filled out
         for (const [id, config] of Object.entries(STAT_CONFIG)) {
           const value = parseFloat(document.getElementById(id).value) || 0;
@@ -347,7 +393,8 @@
         }
 
         if (activeStats.length === 0) {
-          document.getElementById("display").innerText = "Gear Score: 0.00 (0.00%)";
+          document.getElementById("display").innerText =
+            "Gear Score: 0.00 (0.00%)";
           return;
         }
 
@@ -355,7 +402,7 @@
         let rollsDistribution = {};
         let totalAssignedRolls = 0;
 
-        activeStats.forEach(stat => {
+        activeStats.forEach((stat) => {
           const avgRoll = (stat.config.min + stat.config.max) / 2;
           let estimatedRolls = Math.max(1, Math.round(stat.value / avgRoll));
           rollsDistribution[stat.id] = estimatedRolls;
@@ -364,13 +411,14 @@
 
         // 3. Dynamically adjust assigned rolls so they perfectly fit the gear's 9-roll budget
         const TOTAL_BUDGET_ROLLS = 9;
-        
-        if (totalAssignedRolls !== TOTAL_BUDGET_ROLLS) {
-          while (totalAssignedRolls < TOTAL_BUDGET_ROLLS) {
+        const usableBudget = Math.max(0, TOTAL_BUDGET_ROLLS - unusableStats);
+
+        if (totalAssignedRolls !== usableBudget) {
+          while (totalAssignedRolls < usableBudget) {
             let bestStatId = null;
             let maxDifference = -Infinity;
-            
-            activeStats.forEach(stat => {
+
+            activeStats.forEach((stat) => {
               const avgRoll = (stat.config.min + stat.config.max) / 2;
               let fractionalRolls = stat.value / avgRoll;
               let difference = fractionalRolls - rollsDistribution[stat.id];
@@ -379,16 +427,16 @@
                 bestStatId = stat.id;
               }
             });
-            
+
             rollsDistribution[bestStatId]++;
             totalAssignedRolls++;
           }
 
-          while (totalAssignedRolls > TOTAL_BUDGET_ROLLS) {
+          while (totalAssignedRolls > usableBudget) {
             let worstStatId = null;
             let minDifference = Infinity;
-            
-            activeStats.forEach(stat => {
+
+            activeStats.forEach((stat) => {
               if (rollsDistribution[stat.id] > 1) {
                 const avgRoll = (stat.config.min + stat.config.max) / 2;
                 let fractionalRolls = stat.value / avgRoll;
@@ -399,7 +447,7 @@
                 }
               }
             });
-            
+
             if (!worstStatId) break;
             rollsDistribution[worstStatId]--;
             totalAssignedRolls--;
@@ -409,19 +457,25 @@
         // 4. Calculate the roll efficiency scores
         let gearScore = 0;
 
-        activeStats.forEach(stat => {
+        activeStats.forEach((stat) => {
           const assignedRolls = rollsDistribution[stat.id];
           const minPossibleValue = assignedRolls * stat.config.min;
           const maxPossibleValue = assignedRolls * stat.config.max;
-          
-          let statScore = ((stat.value - minPossibleValue) / (maxPossibleValue - minPossibleValue)) * (assignedRolls * 10);
+
+          let statScore =
+            ((stat.value - minPossibleValue) /
+              (maxPossibleValue - minPossibleValue)) *
+            (assignedRolls * 10);
           if (isNaN(statScore) || statScore < 0) statScore = 0;
 
           // Apply weights if choice is 'yes' and stat is flat attack, flat HP, or flat defense
-          if (useWeightedFlats && ["flat-attack", "flat-hp", "flat-defense"].includes(stat.id)) {
+          if (
+            useWeightedFlats &&
+            ["flat-attack", "flat-hp", "flat-defense"].includes(stat.id)
+          ) {
             statScore /= 2;
           }
-          
+
           gearScore += statScore;
         });
 
